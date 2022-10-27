@@ -1,5 +1,5 @@
 {
-  "name": "tab-model",
+  "name": "@tab-edit/model",
   "version": "1.0.0",
   "description": "A CodeMirror 6 extension template for modelling music tab text",
   "main": "dist/index.js",
