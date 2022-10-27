@@ -1,6 +1,6 @@
 import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import { EditorView, logException, ViewPlugin, ViewUpdate } from "@codemirror/view";
-import { TabModelState } from "../model-state";
+import { TabModelState } from "../extension/model-state";
 import { TabParseContext } from "./parse-context";
 
 type Callback = (deadline?: IdleDeadline) => void;

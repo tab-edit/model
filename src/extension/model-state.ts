@@ -1,6 +1,6 @@
 import { Transaction } from "@codemirror/state";
-import { TabTree } from "./structures/tree";
-import { TabParseContext } from "./parse-work/parse-context";
+import { TabTree } from "../structures/tree";
+import { TabParseContext } from "../parse-work/parse-context";
 
 export abstract class TabModelState {
     // The current tree. Immutable, because directly accessible from

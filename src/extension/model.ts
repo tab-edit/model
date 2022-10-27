@@ -1,9 +1,9 @@
 import { EditorState, Extension, Facet, StateField } from "@codemirror/state";
 import { EditorView, ViewPlugin } from "@codemirror/view";
-import { TabParseWorker } from "./parse-work/parse-worker";
+import { TabParseWorker } from "../parse-work/parse-worker";
 import { TabModelState } from "./model-state";
-import { TabTree } from "./structures/tree";
-import { TabParser } from "./parsing/parser";
+import { TabTree } from "../structures/tree";
+import { TabParser } from "../parsing/parser";
 
 
 export abstract class TabModel {

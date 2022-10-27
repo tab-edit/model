@@ -1,6 +1,6 @@
 import { ChangeDesc, EditorState, Facet, Transaction } from "@codemirror/state";
 import { ChangedRange } from "@lezer/common";
-import { TabModel } from "../model";
+import { TabModel } from "../extension/model";
 import { TabTree } from "../structures/tree";
 import { Fragment } from "../structures/fragment";
 import { PartialTabParse } from "../parsing/partial_parse";
