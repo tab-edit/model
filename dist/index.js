@@ -25,15 +25,16 @@ else {
  * Default scheduler can be overridden by overriding the `TabParseWorker.requestIdle` method
  */
 class TabParseWorker {
+    view;
+    //cancels current scheduled work via clearTimeout() or similar
+    working = null;
+    workScheduled = 0;
+    // End of the current time chunk
+    chunkEnd = -1;
+    // Milliseconds of budget left for this chunk
+    chunkBudget = -1;
     constructor(view) {
         this.view = view;
-        //cancels current scheduled work via clearTimeout() or similar
-        this.working = null;
-        this.workScheduled = 0;
-        // End of the current time chunk
-        this.chunkEnd = -1;
-        // Milliseconds of budget left for this chunk
-        this.chunkBudget = -1;
         this.work = this.work.bind(this);
         this.scheduleWork();
     }
@@ -105,6 +106,9 @@ class TabParseWorker {
 }
 
 class TabTree {
+    fragments;
+    from;
+    to;
     constructor(fragments) {
         this.fragments = fragments;
         this.from = fragments[0] ? fragments[0].from : 0;
@@ -115,11 +119,13 @@ class TabTree {
         return new class BlankModel extends TabTree {
         }([{ from, to }]);
     }
+    static empty = new class BlankModel extends TabTree {
+    }([]);
 }
-TabTree.empty = new class BlankModel extends TabTree {
-}([]);
 
 class Fragment {
+    from;
+    to;
     constructor(from, to) {
         this.from = from;
         this.to = to;
@@ -191,6 +197,17 @@ class TabParser {
 }
 
 class TabParseContext {
+    parser;
+    state;
+    fragments;
+    tree;
+    treeLen;
+    viewport;
+    skipped;
+    scheduleOn;
+    parse = null;
+    /// @internal
+    tempSkipped = [];
     /// @internal
     constructor(parser, 
     /// The current editor state.
@@ -220,9 +237,6 @@ class TabParseContext {
         this.viewport = viewport;
         this.skipped = skipped;
         this.scheduleOn = scheduleOn;
-        this.parse = null;
-        /// @internal
-        this.tempSkipped = [];
     }
     startParse() {
         return this.parser.startParse(this.state, this.fragments);
@@ -250,12 +264,11 @@ class TabParseContext {
     work(time, upto) {
         if (upto != null && upto >= this.state.doc.length)
             upto = undefined;
-        if (this.tree !== TabTree.empty && this.isDone(upto !== null && upto !== void 0 ? upto : this.state.doc.length)) {
+        if (this.tree !== TabTree.empty && this.isDone(upto ?? this.state.doc.length)) {
             this.takeTree();
             return true;
         }
         return this.withContext(() => {
-            var _a;
             let endTime = Date.now() + time;
             if (!this.parse)
                 this.parse = this.startParse();
@@ -266,12 +279,12 @@ class TabParseContext {
                 let { tree } = this.parse.advance();
                 if (tree !== null) {
                     this.fragments = this.withoutTempSkipped(Fragment.addTree(tree, this.fragments));
-                    this.treeLen = (_a = this.parse.stoppedAt) !== null && _a !== void 0 ? _a : this.state.doc.length;
+                    this.treeLen = this.parse.stoppedAt ?? this.state.doc.length;
                     this.tree = tree;
                     this.parse = null;
                     // TODO: for some reason, this.parse.stoppedAt is always null when we reach the end of an incompltete tree
                     // and this prevents us from starting another parse
-                    if (this.treeLen < (upto !== null && upto !== void 0 ? upto : this.state.doc.length))
+                    if (this.treeLen < (upto ?? this.state.doc.length))
                         this.parse = this.startParse();
                     else
                         return false;
@@ -412,6 +425,8 @@ function cutFragments(fragments, from, to) {
 }
 
 class PartialTabParse {
+    /// Reports whether `stopAt` has been called on this parse.
+    stoppedAt;
 }
 
 class Cursor {
@@ -423,6 +438,12 @@ class Cursor {
 /// configuration object and returns a `TabModelSupport` instance, as 
 /// the main way for client code to use the package
 class TabModelSupport {
+    tabModel;
+    support;
+    /// An extension including both the model and its support 
+    /// extensions. (Allowing the object to be used as an extension 
+    /// value itself.)
+    extension;
     /// Create a support object
     constructor(
     /// The model object.
@@ -436,6 +457,10 @@ class TabModelSupport {
 }
 
 class TabModelState {
+    context;
+    // The current tree. Immutable, because directly accessible from
+    // the editor state.
+    tree;
     constructor(
     // A mutable parse state that is used to preserve work done during
     // the lifetime of a state when moving to the next state.
@@ -446,6 +471,11 @@ class TabModelState {
 }
 
 class TabModel {
+    data;
+    parser;
+    modelPackage;
+    /// The extension value to install this provider.
+    extension;
     constructor(
     /// The tablature data data facet used for this model (TODO: I don't understand this)
     data, parser, modelPackage, extraExtensions = []) {
@@ -463,6 +493,9 @@ class TabModel {
     }
 }
 class TabModelPackage {
+    facet;
+    viewPlugin;
+    getModelState;
     constructor(facet, viewPlugin, getModelState) {
         this.facet = facet;
         this.viewPlugin = viewPlugin;
@@ -480,8 +513,7 @@ class TabModelPackage {
     /// method will do at most `timeout` milliseconds of work to parse
     /// up to that point if the tree isn't already available.
     ensureTree(state, upto, timeout = 50) {
-        var _a;
-        let parse = (_a = state.field(this.getModelState(), false)) === null || _a === void 0 ? void 0 : _a.context;
+        let parse = state.field(this.getModelState(), false)?.context;
         return !parse ? null : parse.isDone(upto) || parse.work(timeout, upto) ? parse.tree : null;
     }
     /// Queries whether there is a full syntax tree available up to the 
@@ -491,8 +523,7 @@ class TabModelPackage {
     /// has spent a certain amount of time or has moved beyond the visible
     /// viewport. Always returns false if no model has been enabled.
     treeAvailable(state, upto = state.doc.length) {
-        var _a;
-        return ((_a = state.field(this.state, false)) === null || _a === void 0 ? void 0 : _a.context.isDone(upto)) || false;
+        return state.field(this.state, false)?.context.isDone(upto) || false;
     }
     /// Tells you whether the model parser is planning to do more
     /// parsing work (in a `requestIdleCallback` pseudo-thread) or has
@@ -500,8 +531,7 @@ class TabModelPackage {
     /// because it spent too much time and was cut off, or because there
     /// is no model parser enabled.
     parserRunning(view) {
-        var _a;
-        return ((_a = view.plugin(this.viewPlugin)) === null || _a === void 0 ? void 0 : _a.isWorking()) || false;
+        return view.plugin(this.viewPlugin)?.isWorking() || false;
     }
     dataFacetAt(state, pos, side) {
         let topModel = state.facet(this.facet);

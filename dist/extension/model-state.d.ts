@@ -1,6 +1,6 @@
 import { Transaction } from "@codemirror/state";
 import { TabTree } from "../structures/tree";
-import { TabParseContext } from "../parse-work/parse-context";
+import { TabParseContext } from "../parse-scheduling/parse-context";
 export declare abstract class TabModelState {
     readonly context: TabParseContext;
     readonly tree: TabTree;

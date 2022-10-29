@@ -9,7 +9,7 @@ import { TabParser } from "../parsing/parser";
 type ParseCtxConstructor<T extends TabParseContext> = new(...args: ConstructorParameters<typeof TabParseContext>) => T
 
 export abstract class TabParseContext {
-    private parse: PartialTabParse = null;
+    private parse: PartialTabParse|null = null;
     /// @internal
     tempSkipped: {from: number, to: number}[] = [];
 
@@ -38,7 +38,7 @@ export abstract class TabParseContext {
         public scheduleOn: Promise<unknown> | null
     ) {}
 
-    abstract get currentContext(): TabParseContext;
+    abstract get currentContext(): TabParseContext|null;
     abstract set currentContext(ctx: TabParseContext);
 
     private startParse() {

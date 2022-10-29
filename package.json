@@ -27,6 +27,7 @@
   "dependencies": {
     "@codemirror/state": "github:codemirror/state",
     "@codemirror/view": "github:codemirror/view",
+    "@lezer/common": "^1.0.1",
     "@rollup/plugin-typescript": "^9.0.2"
   }
 }

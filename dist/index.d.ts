@@ -1,5 +1,5 @@
-export { TabParseWorker } from "./parse-work/parse-worker";
-export { TabParseContext } from "./parse-work/parse-context";
+export { TabParseWorker } from "./parse-scheduling/parse-worker";
+export { TabParseContext } from "./parse-scheduling/parse-context";
 export { TabParser } from "./parsing/parser";
 export { PartialTabParse } from "./parsing/partial_parse";
 export { Cursor } from "./utils/cursor";
