@@ -32,8 +32,8 @@ export declare abstract class TabParseContext {
         from: number;
         to: number;
     }[], scheduleOn: Promise<unknown> | null);
-    abstract get currentContext(): TabParseContext | null;
-    abstract set currentContext(ctx: TabParseContext);
+    abstract getCurrentContext(): TabParseContext | null;
+    abstract setCurrentContext(ctx: TabParseContext | null): void;
     private startParse;
     static init<T extends TabParseContext>(ParseContextType: ParseCtxConstructor<T>, state: EditorState, modelFacet: Facet<TabModel, TabModel>): T;
     apply(tr: Transaction): this;
@@ -48,33 +48,20 @@ export declare abstract class TabParseContext {
     }): boolean;
     reset(): void;
     skipUntilInView(from: number, to: number): void;
-    static getSkippingParser(until?: Promise<unknown>): {
+    getSkippingParser(until?: Promise<unknown>): {
         createParse(editorState: EditorState, fragments: readonly Fragment[], ranges: readonly {
             from: number;
             to: number;
-        }[]): {
-            parsedPos: number;
-            advance(): {
-                blocked: boolean;
-                tree: {
-                    readonly from: number;
-                    readonly to: number;
-                    readonly fragments: Fragment[];
-                };
-            };
-            stoppedAt: any;
-            stopAt(): void;
-            getFragments(): any[];
-        };
-        startParse(editorState: EditorState, fragments?: readonly Fragment[], ranges?: readonly {
-            from: number;
-            to: number;
         }[]): PartialTabParse<Fragment>;
-        parse(editorState: EditorState, fragments?: readonly Fragment[], ranges?: readonly {
+        startParse(editorState: EditorState, fragments?: readonly Fragment[] | undefined, ranges?: readonly {
             from: number;
             to: number;
-        }[]): TabTree<Fragment>;
+        }[] | undefined): PartialTabParse<Fragment>;
+        parse(editorState: EditorState, fragments?: readonly Fragment[] | undefined, ranges?: readonly {
+            from: number;
+            to: number;
+        }[] | undefined): TabTree<Fragment>;
     };
-    isDone(upto: number): boolean;
+    isDone(upto: number): boolean | 0;
 }
 export {};

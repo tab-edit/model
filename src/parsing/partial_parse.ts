@@ -13,7 +13,7 @@ export abstract class PartialTabParse<F extends Fragment = Fragment> {
     
     
     /// The position up to which the document has been parsed.
-    abstract readonly parsedPos: number;
+    abstract parsedPos: number;
 
     /// Tell the parse to not advance beyond the given position.
     /// `advance` will return a tree when the parse has reached the
@@ -24,7 +24,7 @@ export abstract class PartialTabParse<F extends Fragment = Fragment> {
     abstract stopAt(pos: number): void;
 
     /// Reports whether `stopAt` has been called on this parse.
-    readonly stoppedAt: number | null;
+    abstract readonly stoppedAt: number | null;
 
     abstract getFragments(): Fragment[];
 }

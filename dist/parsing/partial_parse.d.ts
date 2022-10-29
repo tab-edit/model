@@ -5,8 +5,8 @@ export declare abstract class PartialTabParse<F extends Fragment = Fragment> {
         blocked: boolean;
         tree: TabTree<F> | null;
     };
-    abstract readonly parsedPos: number;
+    abstract parsedPos: number;
     abstract stopAt(pos: number): void;
-    readonly stoppedAt: number | null;
+    abstract readonly stoppedAt: number | null;
     abstract getFragments(): Fragment[];
 }

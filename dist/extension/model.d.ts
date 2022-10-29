@@ -22,7 +22,7 @@ export declare class TabModelPackage {
     private readonly getModelState;
     constructor(facet: Facet<TabModel, TabModel | null>, viewPlugin: ViewPlugin<TabParseWorker>, getModelState: () => StateField<TabModelState>);
     get state(): StateField<TabModelState>;
-    tree(state: EditorState): TabTree<import("..").Fragment>;
+    tree(state: EditorState): TabTree<import("..").Fragment> | null;
     ensureTree(state: EditorState, upto: number, timeout?: number): TabTree | null;
     treeAvailable(state: EditorState, upto?: number): boolean;
     parserRunning(view: EditorView): boolean | (() => void);
@@ -30,7 +30,7 @@ export declare class TabModelPackage {
         [name: string]: any;
     }, readonly {
         [name: string]: any;
-    }[]>;
+    }[]> | null;
     static defineDataFacet(baseData?: {
         [name: string]: any;
     }): Facet<{

@@ -38,8 +38,8 @@ export abstract class TabParseContext {
         public scheduleOn: Promise<unknown> | null
     ) {}
 
-    abstract get currentContext(): TabParseContext|null;
-    abstract set currentContext(ctx: TabParseContext);
+    abstract getCurrentContext(): TabParseContext|null;
+    abstract setCurrentContext(ctx: TabParseContext|null): void;
 
     private startParse() {
         return this.parser.startParse(this.state, this.fragments);
@@ -115,10 +115,10 @@ export abstract class TabParseContext {
     }
 
     private withContext<T>(f: () => T): T {
-        let prev = this.currentContext;
-        this.currentContext = this;
+        let prev = this.getCurrentContext();
+        this.setCurrentContext(this);
         try { return f(); }
-        finally { this.currentContext = prev; }
+        finally { this.setCurrentContext(prev); }
     }
 
     private withoutTempSkipped(fragments: readonly Fragment[]) {
@@ -196,14 +196,15 @@ export abstract class TabParseContext {
     ///
     /// When `until` is given, a reparse will be scheduled when that
     /// promise resolves.
-    static getSkippingParser(until?: Promise<unknown>) {
+    getSkippingParser(until?: Promise<unknown>,) {
+        const getCurrentContext = this.getCurrentContext;
         const test = new class extends TabParser<Fragment> {
             createParse(editorState: EditorState, fragments: readonly Fragment[], ranges: readonly { from: number; to: number; }[]) {
                 let from = ranges[0].from, to = ranges[ranges.length - 1].to;
                 let parser = {
                     parsedPos: from,
                     advance() {
-                        let cx = this.currentContext;
+                        let cx = getCurrentContext()
                         if (cx) {
                             for (let r of ranges) cx.tempSkipped.push(r);
                             if (until) cx.scheduleOn = cx.scheduleOn ? Promise.all([cx.scheduleOn, until]) : until;
@@ -214,7 +215,7 @@ export abstract class TabParseContext {
                     stoppedAt: null,
                     stopAt() {},
                     getFragments() { return [] }
-                }
+                } as PartialTabParse<Fragment>;
                 return parser;
             }
         }

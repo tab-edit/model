@@ -308,13 +308,13 @@ class TabParseContext {
         }
     }
     withContext(f) {
-        let prev = this.currentContext;
-        this.currentContext = this;
+        let prev = this.getCurrentContext();
+        this.setCurrentContext(this);
         try {
             return f();
         }
         finally {
-            this.currentContext = prev;
+            this.setCurrentContext(prev);
         }
     }
     withoutTempSkipped(fragments) {
@@ -387,14 +387,15 @@ class TabParseContext {
     ///
     /// When `until` is given, a reparse will be scheduled when that
     /// promise resolves.
-    static getSkippingParser(until) {
+    getSkippingParser(until) {
+        const getCurrentContext = this.getCurrentContext;
         const test = new class extends TabParser {
             createParse(editorState, fragments, ranges) {
                 let from = ranges[0].from, to = ranges[ranges.length - 1].to;
                 let parser = {
                     parsedPos: from,
                     advance() {
-                        let cx = this.currentContext;
+                        let cx = getCurrentContext();
                         if (cx) {
                             for (let r of ranges)
                                 cx.tempSkipped.push(r);
@@ -425,8 +426,6 @@ function cutFragments(fragments, from, to) {
 }
 
 class PartialTabParse {
-    /// Reports whether `stopAt` has been called on this parse.
-    stoppedAt;
 }
 
 class Cursor {
