@@ -6,7 +6,10 @@ export abstract class Fragment {
         readonly from: number,
         readonly to: number,
     ) {}
+
+    abstract advance(): boolean;
     abstract get isParsed(): boolean;
+
     abstract createOffsetCopy(offset: number): Fragment;
     /**
      * Applies a set of edits to an array of fragments, reusing unaffected fragments,

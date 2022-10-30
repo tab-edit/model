@@ -4,6 +4,7 @@ export declare abstract class Fragment {
     readonly from: number;
     readonly to: number;
     constructor(from: number, to: number);
+    abstract advance(): boolean;
     abstract get isParsed(): boolean;
     abstract createOffsetCopy(offset: number): Fragment;
     /**
