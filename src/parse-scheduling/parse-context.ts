@@ -212,9 +212,6 @@ export abstract class TabParseContext {
                         this.parsedPos = to;
                         return {blocked: false, tree: TabTree.createBlankTree(from, to)};
                     },
-                    stoppedAt: null,
-                    stopAt() {},
-                    getFragments() { return [] }
                 } as PartialTabParse<Fragment>;
                 return parser;
             }

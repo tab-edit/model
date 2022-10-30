@@ -405,9 +405,6 @@ class TabParseContext {
                         this.parsedPos = to;
                         return { blocked: false, tree: TabTree.createBlankTree(from, to) };
                     },
-                    stoppedAt: null,
-                    stopAt() { },
-                    getFragments() { return []; }
                 };
                 return parser;
             }
@@ -426,6 +423,22 @@ function cutFragments(fragments, from, to) {
 }
 
 class PartialTabParse {
+    fragments = [];
+    getFragments() { this.fragments; }
+    _stoppedAt = null;
+    /// Reports whether `stopAt` has been called on this parse.
+    get stoppedAt() { return this._stoppedAt; }
+    /// Tell the parse to not advance beyond the given position.
+    /// `advance` will return a tree when the parse has reached the
+    /// position. Note that, depending on the parser algorithm and the
+    /// state of the parse when `stopAt` was called, that tree may
+    /// contain nodes beyond the position. It is not allowed to call
+    /// `stopAt` a second time with a higher position.
+    stopAt(pos) {
+        if (this.stoppedAt !== null && this.stoppedAt < pos)
+            throw new RangeError("Can't move stoppedAt forward");
+        this._stoppedAt = pos;
+    }
 }
 
 class Cursor {
